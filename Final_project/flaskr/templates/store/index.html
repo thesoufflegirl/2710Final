@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Browse{% endblock %}</h1>
+  {% if g.user %}
+    <a class="action" href="{{ url_for('store.cart') }}">Cart</a>
+  {% endif %}
+{% endblock %} 
+
+{% block content %}
+
+{% for product in products %}
+    <h3>{{ product['title'] }}</h3> 
+    <img src="static/img/{{ product['productID']}}.jpg" alt="" width="200px" height="200px">
+    <p> Price: $ {{ product['price'] }}</p>
+    <form method="post">
+        <label for="quantity">Quantity</label>
+        <input quantity="quantity" id="quantity">
+        <input type = "hidden" id = productID value = {{product['productID']}}>
+     <input type="submit" value="Add to Cart">
+      </form>        
+{% endfor %}
+
+{% endblock %}
+

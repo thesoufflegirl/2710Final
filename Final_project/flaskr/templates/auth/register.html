@@ -10,6 +10,13 @@
     <input name="username" id="username" required>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required>
+    <select name= "role" id = "role">
+        {% for r in ["admin","Sales Person", "Customer"] %}
+    <option role= "{{r}}" SELECTED>{{r}}</option>"
+    {% endfor %}
+    </select>
     <input type="submit" value="Register">
   </form>
 {% endblock %}
+
+
