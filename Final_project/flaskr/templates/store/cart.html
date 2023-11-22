@@ -4,7 +4,6 @@
   <h1>{% block title %}Cart{% endblock %}</h1>
   <a class="action" href="{{ url_for('index') }}">Continue Browsing</a>
   {% if g.user %}
-    <a class="action" href="{{ url_for('store.cart') }}">Cart</a>
   {% endif %}
 {% endblock %} 
 

@@ -4,6 +4,22 @@
   <h1>{% block title %}Browse{% endblock %}</h1>
   {% if g.user %}
     <a class="action" href="{{ url_for('store.cart') }}">Cart</a>
+     <form method="post" action="/browse">
+        <div>
+        <label for="genre">Genre</label>
+        <select name= "genre" id = "genre">
+        {% for r in genreList%}
+            <option genre= "{{r}}" SELECTED>{{r}}</option>
+        {% endfor %}
+        </select>
+        <label for="maxPrice">Max Price</label>
+        <input name="maxPrice" id="maxPrice" value = '0'>
+        <label for="title">Title</label>
+        <input name="title" id="title">
+        <input type="submit" value="Sort">
+    </div>
+     </form>
+
   {% endif %}
 {% endblock %} 
 
@@ -27,7 +43,3 @@
 {% endfor %}
 
 {% endblock %}
-
-
-
-

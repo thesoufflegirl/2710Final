@@ -13,10 +13,17 @@ bp = Blueprint('store', __name__)
 @bp.route('/', methods=['GET','POST'])
 def index():
     db = get_db()
+    session.get('genreList', [])
+    genre = db.execute('SELECT DISTINCT genreClassification FROM Products').fetchall()
+    genreList = []
+    for a in genre:
+        genreList.append(a['genreClassification'])
+    genreList.append('select')
+    session['genreList'] = genreList
     products = db.execute(
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
-    return render_template('store/index.html', products=products)
+    return render_template('store/index.html', products=products, genreList = genreList)
 
 @bp.route('/cart', methods=('GET', 'POST'))
 def cart():
@@ -102,7 +109,6 @@ def checkout():
 
 def updateInventory(newInventory):
     db = get_db()
-    print('hey')
     salesPerson = 'Maddie'
     datetoday = date.today()
     for item in newInventory:
@@ -113,3 +119,56 @@ def updateInventory(newInventory):
         db.execute('INSERT INTO Transactions (date,salespersonName, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,salesPerson,productID,session.get('user_id'),price,newInventory[item])) 
         db.commit()
     return ()
+
+
+@bp.route("/browse", methods=['GET','POST'])
+def browse():
+    db = get_db()
+    products = db.execute(
+        'SELECT productID, title,price FROM Products'
+    ).fetchall() 
+    genreList = session.get('genreList')
+    genre = request.form['genre']
+    maxPrice = request.form['maxPrice']
+    title = request.form['title']
+    if maxPrice == "":
+        maxPrice = 0
+    try:
+        maxPrice = int(maxPrice)
+    except:
+        error = "Max price must be an integer value greater than 0" 
+
+    if maxPrice <0:
+        error = "Max price must be an integer value greater than or equal to 0" 
+        flash(error)
+        return  redirect(url_for('index'))
+    if title != "":
+        title ='%'+title+'%'
+
+    if genre != 'select':
+        print(genre)
+        if title != '':
+            print(title)
+            if maxPrice > 0:
+                products = db.execute('SELECT productID, title,price FROM Products WHERE genreClassification = ? AND title LIKE ? AND price < ?',(genre,title,maxPrice)).fetchall()
+            else:products = db.execute('SELECT productID, title,price FROM Products WHERE genreClassification = ? AND title LIKE ?',(genre,title)).fetchall()
+        else:    
+            if maxPrice > 0:
+                print('genre+price')
+                products = db.execute('SELECT productID, title,price FROM Products WHERE genreClassification = ? AND price < ?',(genre,maxPrice)).fetchall()
+            else:
+                print('just genre')
+                products = db.execute('SELECT productID, title,price FROM Products WHERE genreClassification = ?',(genre,)).fetchall()
+    else:
+        if title != '':
+            if maxPrice > 0:
+                products = db.execute('SELECT productID, title,price FROM Products WHERE title LIKE ? AND price < ?',(title,maxPrice)).fetchall()
+            else:
+                products = db.execute('SELECT productID, title,price FROM Products WHERE title LIKE ? ',(title,)).fetchall()
+        else:
+            if maxPrice > 0:
+                products = db.execute('SELECT productID, title,price FROM Products WHERE price < ?',(maxPrice,)).fetchall()
+            else:
+                products = db.execute('SELECT productID, title,price FROM Products').fetchall()
+
+    return  render_template('store/index.html', products=products, genreList = genreList)
