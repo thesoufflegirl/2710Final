@@ -5,11 +5,10 @@ from werkzeug.exceptions import abort
 
 from flaskr.auth import login_required
 from flaskr.db import get_db
+from datetime import date
 
 bp = Blueprint('store', __name__)
 
-
-#cart = session['cart']
 
 @bp.route('/', methods=['GET','POST'])
 def index():
@@ -17,30 +16,100 @@ def index():
     products = db.execute(
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
-    if request.method == 'POST':
-        print('blah')
-        #quantity = request.form['quantity']
-        #print(quantity)
     return render_template('store/index.html', products=products)
 
 @bp.route('/cart', methods=('GET', 'POST'))
 def cart():
-    return 4
+    total = 0
+    db = get_db()
+    products = db.execute(
+        'SELECT productID, title,price FROM Products'
+    ).fetchall() 
+    cart = session.get('cart')
+    print(cart)
+    for item in cart:
+        for product in products:
+            id = str(product['productID'])
+            price = db.execute('SELECT price FROM Products WHERE productID = ?',(id,)).fetchone()['price']
+            if str(product['productID']) == item:
+               total +=  cart[item]*price
+
+        
+    return render_template('store/cart.html', products=products,cart = cart,total = total)
 
 @login_required
 
 
 @bp.route("/add", methods=['GET','POST'])
 def add():
-    print('add')
+    cart = session.get('cart', {'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0})
+    code = request.form['code']
+    quantity = int(request.form['quantity'])
+    cart[code] = cart[code]+quantity
+    session['cart'] = cart
+    print(cart)
     return redirect(url_for('index'))
 
-    #if cart in session:
-     #   cart = cart.add(product=request.form['product'], quantity=int(request.form['quantity']))
-      #  print(cart)
-    #else:
-    #    cart = session.get('cart', {'1':0, '2':0, '3':0})
-    #    print(cart, "new")
-    #    cart = cart.add(product=request.form['product'], quantity=int(request.form['quantity']))
+@bp.route("/edit", methods=['GET','POST'])
+def edit():
+    cart = session.get('cart')
+    code = request.form['code']
+    quantity = int(request.form['quantity'])
+    cart[code] = quantity
+    session['cart'] = cart
+    print(cart)
+    return redirect(url_for('store.cart'))
 
-    #return jsonify(cart)
+@bp.route("/checkout", methods=['GET','POST'])
+def checkout():
+    print('checkout')
+    db = get_db()
+    inventoryAmt = db.execute('SELECT inventoryAmount,productID,title FROM Products').fetchall()
+    inventory = {}
+    titles = {} 
+    id = {}
+    cart = session.get('cart')
+    k = 0
+    for i in inventoryAmt:
+        id = str(inventoryAmt[k]['productID'])
+        amt = int(inventoryAmt[k]['inventoryAmount'])
+        title = inventoryAmt[k]['title']
+        inventory[id] = amt 
+        titles[id] = title
+        k+= 1 
+    print(inventory)
+    newInventory = {}
+    transacFail = False 
+    for i in inventory:
+        print(k)
+        if inventory[i] <  cart[i]:
+            title = titles[i]
+            error = f'Sorry we are out of {title}'
+            print(error)
+            transacFail = True
+            break
+        else:
+            newInventory[i] = inventory[i]-cart[i]
+    if transacFail == False:
+        session['cart']  ={'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0}
+        flash('You have successfully checked out, Thanks for shopping with us!')
+        updateInventory(newInventory)
+        return redirect(url_for('index'))
+    else: 
+        flash(error)
+        return redirect(url_for('store.cart'))
+
+
+def updateInventory(newInventory):
+    db = get_db()
+    print('hey')
+    salesPerson = 'Maddie'
+    datetoday = date.today()
+    for item in newInventory:
+        productID = item
+        price = db.execute('SELECT price FROM Products WHERE productID = ?',(productID,)).fetchone()['price']
+        db.execute('UPDATE Products SET inventoryAmount = ? WHERE productID = ?',(newInventory[item],item)) 
+        db.commit()
+        db.execute('INSERT INTO Transactions (date,salespersonName, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,salesPerson,productID,session.get('user_id'),price,newInventory[item])) 
+        db.commit()
+    return ()

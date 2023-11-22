@@ -45,7 +45,7 @@ CREATE TABLE Products (
 
 
 CREATE TABLE Transactions (
-    orderNumber INT PRIMARY KEY,
+    orderNumber INTEGER PRIMARY KEY AUTOINCREMENT,
     date DATE,
     salespersonName VARCHAR(255),
     productID INT, -- Foreign key referencing Products table
@@ -56,12 +56,15 @@ CREATE TABLE Transactions (
 
 
 CREATE TABLE Salespersons (
+    employeeID INT PRIMARY KEY
     name VARCHAR(255),
     address VARCHAR(255),
     email VARCHAR(255),
     jobTitle VARCHAR(255),
     storeAssigned VARCHAR(255), -- Foreign key referencing Store table
     salary DECIMAL(12,2)
+    foreign key (storeAssigned) references store(storeID)
+    on delete set null
 );
 
 
@@ -74,8 +77,10 @@ CREATE TABLE Store (
 );
 
 INSERT INTO Store VALUES
-(1, '123 Market St', 'Cole Curry', 1, 1),
-(2, '456 Retail St', 'Alex Wade', 2, 2);
+(1, '123 Market St', 1, 1, 1),
+(2, '456 Retail St', 3, 2, 2),
+(3, 'online', 6,1,1)
+;
 
 
 
@@ -102,6 +107,23 @@ INSERT INTO Products VALUES
 (13, 'Five Survive', 'Holly Jackson', 30, 15.99, 'Young Adult Fiction'),
 (14, 'Doppelganger: A Trip into the Mirror World', 'Naomi Klein', 30, 15.99, 'Nonfiction'),
 (15, 'The Art Thief', 'Michael Finkel', 40, 18.99, 'Nonfiction');
+
+INSERT INTO Store VALUES
+(1, '123 Market St', 'Cole Curry', 1, 1),
+(2, '456 Retail St', 'Alex Wade', 2, 2);
+(3, 'online', 'Alex Wade', 2, 2);
+
+INSERT INTO Salespersons VALUES
+(1,'Cole Curry', '111 Sales St', 'colecurry@bookstore.com', 'Manager', 1, 60000),
+(2,'Abbi Kline', '444 Sales St', 'abbikline@bookstore.com', 'Manager', 2, 60000),
+(3,'Alex Wade', '222 Sales St', 'alexwade@bookstore.com', 'Associate', 1, 45000),
+(4,'June Byers', '333 Sales St', 'junebyers@bookstore.com', 'Associate', 1, 45000),
+(5,'Linda Buck', '555 Sales St', 'lindabuck@bookstore.com', 'Associate', 2, 45000),
+(6, 'Maddie K', 'online', 'maddiek@bookstore.com', 'Manager', 3, 0);
+
+INSERT INTO Region VALUES
+(1, 'East', 'Cole Curry'),
+(2, 'West', 'Alex Wade');
 
 
 
