@@ -107,16 +107,16 @@ def checkout():
         return redirect(url_for('store.cart'))
 
 
-def updateInventory(newInventory):
+def updateInventory(newInventory,salesPerson = 6):
     db = get_db()
-    salesPerson = 'Maddie'
+    salesPerson = 6
     datetoday = date.today()
     for item in newInventory:
         productID = item
         price = db.execute('SELECT price FROM Products WHERE productID = ?',(productID,)).fetchone()['price']
         db.execute('UPDATE Products SET inventoryAmount = ? WHERE productID = ?',(newInventory[item],item)) 
         db.commit()
-        db.execute('INSERT INTO Transactions (date,salespersonName, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,salesPerson,productID,session.get('user_id'),price,newInventory[item])) 
+        db.execute('INSERT INTO Transactions (date,employeeID, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,salesPerson,productID,session.get('user_id'),price,newInventory[item])) 
         db.commit()
     return ()
 
@@ -172,3 +172,19 @@ def browse():
                 products = db.execute('SELECT productID, title,price FROM Products').fetchall()
 
     return  render_template('store/index.html', products=products, genreList = genreList)
+
+
+@bp.route('/salesview', methods=['GET','POST'])
+def salesview():
+    db = get_db()
+    session.get('genreList', [])
+    genre = db.execute('SELECT DISTINCT genreClassification FROM Products').fetchall()
+    genreList = []
+    for a in genre:
+        genreList.append(a['genreClassification'])
+    genreList.append('select')
+    session['genreList'] = genreList
+    products = db.execute(
+        'SELECT productID, title,price FROM Products'
+    ).fetchall() 
+    return render_template('store/sales.html', products=products, genreList = genreList)

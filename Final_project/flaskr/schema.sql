@@ -47,22 +47,30 @@ CREATE TABLE Products (
 CREATE TABLE Transactions (
     orderNumber INTEGER PRIMARY KEY AUTOINCREMENT,
     date DATE,
-    salespersonName VARCHAR(255),
+    employeeID INT,
     productID INT, -- Foreign key referencing Products table
     customerID INT, -- Foreign key referencing Customers table
     price DECIMAL(10,2),
-    quantity INT
+    quantity INT,
+    foreign key (employeeID) references employee(employeeID)
+    on delete set null,
+    foreign key (productID) references product(productID)
+    on delete set null,
+    foreign key (customerID) references customer(customerID)
+    on delete set null
 );
 
 
 CREATE TABLE Salespersons (
-    employeeID INT PRIMARY KEY
+    employeeID INT PRIMARY KEY,
     name VARCHAR(255),
     address VARCHAR(255),
     email VARCHAR(255),
     jobTitle VARCHAR(255),
     storeAssigned VARCHAR(255), -- Foreign key referencing Store table
-    salary DECIMAL(12,2)
+    salary DECIMAL(12,2),
+    foreign key (employeeID) references user(userID)
+    on delete cascade,
     foreign key (storeAssigned) references store(storeID)
     on delete set null
 );
@@ -79,8 +87,8 @@ CREATE TABLE Store (
 INSERT INTO Store VALUES
 (1, '123 Market St', 1, 1, 1),
 (2, '456 Retail St', 3, 2, 2),
-(3, 'online', 6,1,1)
-;
+(3, 'online', 6,1,1);
+
 
 
 
@@ -91,7 +99,7 @@ CREATE TABLE Region (
 );
 
 
-INSERT INTO Products VALUES
+INSERT INTO Products VALUES 
 (1, 'Pineapple Street', 'Jenny Jackson', 50, 20.99, 'Fiction'),
 (2, 'Tom Lake', 'Ann Patchett', 30, 15.99, 'Fiction'),
 (3, 'None of This Is True', 'Lisa Jewell', 40, 25.99, 'Mystery'),
@@ -108,11 +116,6 @@ INSERT INTO Products VALUES
 (14, 'Doppelganger: A Trip into the Mirror World', 'Naomi Klein', 30, 15.99, 'Nonfiction'),
 (15, 'The Art Thief', 'Michael Finkel', 40, 18.99, 'Nonfiction');
 
-INSERT INTO Store VALUES
-(1, '123 Market St', 'Cole Curry', 1, 1),
-(2, '456 Retail St', 'Alex Wade', 2, 2);
-(3, 'online', 'Alex Wade', 2, 2);
-
 INSERT INTO Salespersons VALUES
 (1,'Cole Curry', '111 Sales St', 'colecurry@bookstore.com', 'Manager', 1, 60000),
 (2,'Abbi Kline', '444 Sales St', 'abbikline@bookstore.com', 'Manager', 2, 60000),
@@ -124,9 +127,4 @@ INSERT INTO Salespersons VALUES
 INSERT INTO Region VALUES
 (1, 'East', 'Cole Curry'),
 (2, 'West', 'Alex Wade');
-
-
-
-
-
 

@@ -32,7 +32,10 @@
   <form method="post" action="/checkout">
      <input type="submit" value="Check Out Now" class="btnAddAction" />
    </form>
-   <h1>Total Price ${{total}}</h1>
+    {%if total == 0%}
+    <h1>Total Price ${{total|int}}</h1>
+    {% endif%}
+   <h1>Total Price ${{total|round(2, 'floor')}}</h1>
  </div>
 {% endblock %}
 

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Enter Quantities{% endblock %}</h1>
+{% endblock %} 
+
+{% block content %}
+
+<ul>
+{% for product in products %}
+<li>
+                <form method="post" action="/sale">
+                    <div>
+                        <img src="static/img/{{ product['productID']}}.jpg" alt="" width="75px" height="75px">
+                        <span >{{ product['title']}}</span>
+                        <span class="product-price">{{ product['price']}}</span>
+                        <input type="hidden" name="code" value="{{ product['productID']}}"/>
+                        <input type="text" class="product-quantity" name="quantity" value="0" size="2" />
+                    </div>
+                </form>
+            </div>  
+</li>   
+{% endfor %}
+</ul>
+<input type="submit" value="Submit Sales Update" class="btnAddAction" />
+
+{% endblock %}
