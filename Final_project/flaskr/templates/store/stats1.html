@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Stats by Title{% endblock %}</h1>
+    <a class="action" href="{{ url_for('store.salesview') }}">Return to Order Form</a>
+
+{% endblock %} 
+
+{% block content %}
+
+<h1> Products by highest Sales </h1>
+
+<ul>
+{% for product in productSalesList %}
+
+<li>
+    <div>
+    <img src="static/img/{{ product}}.jpg" alt="" width="75px" height="75px">
+    <span >{{ productSalesList[product][0]}} - </span>
+    Total Sales:
+    {%if productSalesList[product][1] == 0%}
+    <span>Total Sales ${{productSalesList[product][1]|int}}</span>
+   {%else%}
+   <span>Total Sales ${{productSalesList[product][1]|round(2, 'floor')}}</span>
+   {% endif%}
+    </div>
+</li>   
+{% endfor %}
+<h1> Products by Highest Quantity Sold </h1>
+
+{% for product in productQuantList %}
+
+<li>
+    <div>
+    <img src="static/img/{{ product}}.jpg" alt="" width="75px" height="75px">
+    <span >{{ productQuantList[product][0]}} - </span>
+    Total Quantity Sold
+    <span>Quantity: {{productQuantList[product][1]|int}}</span>
+
+    </div>
+</li>   
+{% endfor %}
+
+
+</ul>
+{% endblock %}
+

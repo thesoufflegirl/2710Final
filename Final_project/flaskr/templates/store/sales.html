@@ -2,6 +2,8 @@
 
 {% block header %}
   <h1>{% block title %}Enter Quantities{% endblock %}</h1>
+    <a class="action" href="{{ url_for('store.bookstats') }}">See Stats for Books</a>
+
 {% endblock %} 
 
 {% block content %}
@@ -15,13 +17,14 @@
                         <span >{{ product['title']}}</span>
                         <span class="product-price">{{ product['price']}}</span>
                         <input type="hidden" name="code" value="{{ product['productID']}}"/>
-                        <input type="text" class="product-quantity" name="quantity" value="0" size="2" />
+                        <input type="text" class="product-quantity" name="quantity{{ product['productID']}}" value="0" size="2" />
                     </div>
-                </form>
             </div>  
 </li>   
 {% endfor %}
 </ul>
+
 <input type="submit" value="Submit Sales Update" class="btnAddAction" />
+ </form>
 
 {% endblock %}

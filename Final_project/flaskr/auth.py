@@ -15,7 +15,9 @@ def register():
     ## first we have to fix the "oops I'm overwriting people in their tables issue"
     db = get_db()
     row_count = db.execute("SELECT COUNT(*) FROM user").fetchone()[0]
+    print(row_count)
     if row_count == 0:
+        print('did it')
         start = db.execute("SELECT MAX(Salespersons.employeeID) FROM Customers FULL JOIN Salespersons").fetchone()[0]
         print("start",start)
         db.execute(
@@ -117,6 +119,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
+            session['role'] = user['role']
             print(user['role'] )
             if user['infodone'] == "no" and user['role'] == "Customer":
                 return redirect(url_for("auth.info"))

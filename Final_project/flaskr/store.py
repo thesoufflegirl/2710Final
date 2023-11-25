@@ -68,14 +68,14 @@ def edit():
     return redirect(url_for('store.cart'))
 
 @bp.route("/checkout", methods=['GET','POST'])
-def checkout():
-    print('checkout')
+def checkout(employeeID = 6):
     db = get_db()
     inventoryAmt = db.execute('SELECT inventoryAmount,productID,title FROM Products').fetchall()
     inventory = {}
     titles = {} 
     id = {}
     cart = session.get('cart')
+    print(cart)
     k = 0
     for i in inventoryAmt:
         id = str(inventoryAmt[k]['productID'])
@@ -84,39 +84,46 @@ def checkout():
         inventory[id] = amt 
         titles[id] = title
         k+= 1 
-    print(inventory)
     newInventory = {}
     transacFail = False 
     for i in inventory:
-        print(k)
         if inventory[i] <  cart[i]:
             title = titles[i]
             error = f'Sorry we are out of {title}'
-            print(error)
             transacFail = True
             break
         else:
             newInventory[i] = inventory[i]-cart[i]
     if transacFail == False:
+        if session.get('role') == 'Customer':
+            flash('You have successfully checked out, Thanks for shopping with us!')
+            updateInventory(newInventory,employeeID)
+            return redirect(url_for('index'))
+        else:
+            flash('Inventory Updated')
+            updateInventory(newInventory,employeeID)
+            return redirect(url_for('store.sale'))
         session['cart']  ={'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0}
-        flash('You have successfully checked out, Thanks for shopping with us!')
-        updateInventory(newInventory)
-        return redirect(url_for('index'))
+
     else: 
-        flash(error)
-        return redirect(url_for('store.cart'))
+        if session.get('role') == 'Customer':
+            flash(error)
+            return redirect(url_for('index'))
+        else:
+            flash(error)
+            return redirect(url_for('store.sale'))
 
 
-def updateInventory(newInventory,salesPerson = 6):
+def updateInventory(newInventory,employeeID):
     db = get_db()
-    salesPerson = 6
     datetoday = date.today()
+    cart = session.get('cart')
     for item in newInventory:
         productID = item
         price = db.execute('SELECT price FROM Products WHERE productID = ?',(productID,)).fetchone()['price']
         db.execute('UPDATE Products SET inventoryAmount = ? WHERE productID = ?',(newInventory[item],item)) 
         db.commit()
-        db.execute('INSERT INTO Transactions (date,employeeID, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,salesPerson,productID,session.get('user_id'),price,newInventory[item])) 
+        db.execute('INSERT INTO Transactions (date,employeeID, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,employeeID,productID,session.get('user_id'),price,cart[item])) 
         db.commit()
     return ()
 
@@ -188,3 +195,44 @@ def salesview():
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
     return render_template('store/sales.html', products=products, genreList = genreList)
+
+
+@bp.route('/sale', methods=['GET','POST'])
+def sale():
+    print('sale is happening')
+    db = get_db()
+    user_id = session.get('user_id')
+    products = db.execute(
+        'SELECT productID, title,price FROM Products'
+    ).fetchall() 
+    cart = session.get('cart', {'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0})
+    for product in products:
+        id = str(product['productID'])
+        rformname = f"quantity{id}"
+        try:
+            cart[id] = int(request.form[rformname])
+        except:
+            flash('Please enter integer values for items')
+    session['cart'] = cart
+    print('look at me ')
+    print(cart)
+    checkout(user_id)
+    return render_template('store/sales.html', products=products)
+
+
+
+@bp.route('/bookstats', methods=['GET','POST'])
+def bookstats():
+    db = get_db()
+
+    productSalesList = {}
+    productSales = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales, SUM(products.price * transactions.quantity) AS totalProfit FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID;').fetchall()
+    for product in productSales:
+        productSalesList[product['productID']] = [product['title'],product['totalProfit']]
+
+    productQuantList = {}
+    productQuant = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID;').fetchall()
+    for product in productQuant:
+        productQuantList[product['productID']] = [product['title'],product['totalSales']]
+
+    return render_template('store/stats1.html', productSalesList = productSalesList,productQuantList = productQuantList)

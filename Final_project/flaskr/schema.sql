@@ -117,14 +117,21 @@ INSERT INTO Products VALUES
 (15, 'The Art Thief', 'Michael Finkel', 40, 18.99, 'Nonfiction');
 
 INSERT INTO Salespersons VALUES
-(1,'Cole Curry', '111 Sales St', 'colecurry@bookstore.com', 'Manager', 1, 60000),
-(2,'Abbi Kline', '444 Sales St', 'abbikline@bookstore.com', 'Manager', 2, 60000),
-(3,'Alex Wade', '222 Sales St', 'alexwade@bookstore.com', 'Associate', 1, 45000),
-(4,'June Byers', '333 Sales St', 'junebyers@bookstore.com', 'Associate', 1, 45000),
-(5,'Linda Buck', '555 Sales St', 'lindabuck@bookstore.com', 'Associate', 2, 45000),
-(6, 'Maddie K', 'online', 'maddiek@bookstore.com', 'Manager', 3, 0);
+(6,'Cole Curry', '111 Sales St', 'colecurry@bookstore.com', 'Manager', 1, 60000),
+(7,'Abbi Kline', '444 Sales St', 'abbikline@bookstore.com', 'Manager', 2, 60000),
+(8,'Alex Wade', '222 Sales St', 'alexwade@bookstore.com', 'Associate', 1, 45000),
+(9,'June Byers', '333 Sales St', 'junebyers@bookstore.com', 'Associate', 1, 45000),
+(10,'Linda Buck', '555 Sales St', 'lindabuck@bookstore.com', 'Associate', 2, 45000),
+(11, 'Maddie K', 'online', 'maddiek@bookstore.com', 'Manager', 3, 0);
 
 INSERT INTO Region VALUES
 (1, 'East', 'Cole Curry'),
 (2, 'West', 'Alex Wade');
 
+
+INSERT INTO Customers VALUES
+(1, 'John Doe', '123 Main St', 'City1', 'State1', '12345', 'home', 'Married', 'Male', 30, 50000, NULL, NULL),
+(2, 'Jane Smith', '456 Oak St', 'City2', 'State2', '67890', 'home', 'Single', 'Female', 25, 60000, NULL, NULL),
+(3, 'ABC Corp', '789 Elm St', 'City3', 'State3', '13579', 'business', NULL, NULL, NULL, NULL, 'Technology', 1000000),
+(4, 'XYZ Inc', '101 Pine St', 'City4', 'State4', '24680', 'business', NULL, NULL, NULL, NULL, 'Finance', 1500000),
+(5, 'Sam Johnson', '202 Cedar St', 'City5', 'State5', '11223', 'home', 'Single', 'Male', 28, 55000, NULL, NULL);
