@@ -12,6 +12,7 @@ bp = Blueprint('store', __name__)
 
 @bp.route('/', methods=['GET','POST'])
 def index():
+    print('I went back to the right place')
     db = get_db()
     session.get('genreList', [])
     genre = db.execute('SELECT DISTINCT genreClassification FROM Products').fetchall()
@@ -32,7 +33,7 @@ def cart():
     products = db.execute(
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
-    cart = session.get('cart')
+    cart = session.get('cart', {'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0})
     print(cart)
     for item in cart:
         for product in products:
@@ -68,14 +69,13 @@ def edit():
     return redirect(url_for('store.cart'))
 
 @bp.route("/checkout", methods=['GET','POST'])
-def checkout(employeeID = 6):
+def checkout(employeeID = 11):
     db = get_db()
     inventoryAmt = db.execute('SELECT inventoryAmount,productID,title FROM Products').fetchall()
     inventory = {}
     titles = {} 
     id = {}
     cart = session.get('cart')
-    print(cart)
     k = 0
     for i in inventoryAmt:
         id = str(inventoryAmt[k]['productID'])
@@ -85,17 +85,25 @@ def checkout(employeeID = 6):
         titles[id] = title
         k+= 1 
     newInventory = {}
+
     transacFail = False 
-    for i in inventory:
-        if inventory[i] <  cart[i]:
-            title = titles[i]
-            error = f'Sorry we are out of {title}'
-            transacFail = True
-            break
-        else:
-            newInventory[i] = inventory[i]-cart[i]
+    if cart == None:
+        transacFail = True 
+        error = "You don't have anything to checkout with silly goose!"
+    else:
+        for i in inventory:
+            if inventory[i] <  cart[i]:
+                title = titles[i]
+                error = f'Sorry we are out of {title}'
+                session['cart'][i] = 0
+                transacFail = True
+                break
+            else:
+                newInventory[i] = inventory[i]-cart[i]
     if transacFail == False:
+        print(session.get('role'))
         if session.get('role') == 'Customer':
+            print("I am still a customer")
             flash('You have successfully checked out, Thanks for shopping with us!')
             updateInventory(newInventory,employeeID)
             return redirect(url_for('index'))
@@ -103,8 +111,6 @@ def checkout(employeeID = 6):
             flash('Inventory Updated')
             updateInventory(newInventory,employeeID)
             return redirect(url_for('store.sale'))
-        session['cart']  ={'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0}
-
     else: 
         if session.get('role') == 'Customer':
             flash(error)
@@ -115,6 +121,8 @@ def checkout(employeeID = 6):
 
 
 def updateInventory(newInventory,employeeID):
+    print('employeeID')
+    print(employeeID)
     db = get_db()
     datetoday = date.today()
     cart = session.get('cart')
@@ -125,6 +133,8 @@ def updateInventory(newInventory,employeeID):
         db.commit()
         db.execute('INSERT INTO Transactions (date,employeeID, productID, customerID,price, quantity) VALUES (?,?,?,?,?,?)',(datetoday,employeeID,productID,session.get('user_id'),price,cart[item])) 
         db.commit()
+    session['cart']  ={'1':0, '2':0, '3':0,'4':0,'5':0,'6':0,'7':0,'8':0,'9':0,'10':0,'11':0,'12':0,'13':0,'14':0,'15':0}
+
     return ()
 
 
@@ -202,6 +212,8 @@ def sale():
     print('sale is happening')
     db = get_db()
     user_id = session.get('user_id')
+    print('userID')
+    print(user_id)
     products = db.execute(
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
@@ -226,13 +238,54 @@ def bookstats():
     db = get_db()
 
     productSalesList = {}
-    productSales = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales, SUM(products.price * transactions.quantity) AS totalProfit FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID;').fetchall()
+    productSales = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales, SUM(products.price * transactions.quantity) AS totalProfit FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID Order By totalProfit DESC;').fetchall()
     for product in productSales:
         productSalesList[product['productID']] = [product['title'],product['totalProfit']]
 
     productQuantList = {}
-    productQuant = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID;').fetchall()
+    productQuant = db.execute('SELECT products.productID as productID, products.title, SUM(Transactions.quantity) AS totalSales FROM Transactions inner Join products on products.productID = Transactions.productID GROUP BY products.productID Order By totalSales DESC;').fetchall()
     for product in productQuant:
         productQuantList[product['productID']] = [product['title'],product['totalSales']]
 
-    return render_template('store/stats1.html', productSalesList = productSalesList,productQuantList = productQuantList)
+    genreList = {}
+    genreClass = db.execute('SELECT genreClassification, SUM(quantity) AS totalSales FROM Transactions JOIN Products ON Transactions.productID = Products.productID GROUP BY genreClassification ORDER BY totalSales DESC; ').fetchall()
+    for genre in genreClass:
+        genreList[genre['genreClassification']] =genre['totalSales']
+
+    return render_template('store/stats1.html', productSalesList = productSalesList,productQuantList = productQuantList,genreList = genreList)
+
+@bp.route('/workstats', methods=['GET','POST'])
+def workstats():
+    db = get_db()
+
+    transactionList = {}
+    transactions = db.execute('SELECT * from Transactions Join Salespersons on salespersons.employeeID = Transactions.employeeID').fetchall()
+    for item in transactions:
+        if item['quantity'] > 0:
+            transactionList[item['ordernumber']] =(item['name'],item['customerID'],item['productID'],item['storeAssigned'])
+
+    print(session.get('user_id'))
+    print(transactionList)
+    regionSalesList = {}
+    regionSales = db.execute('SELECT Region.regionName, SUM(price * quantity) AS totalSales FROM SalesPersons JOIN Transactions ON Transactions.employeeID = salespersons.employeeID JOIN Store ON Salespersons.storeAssigned = store.storeID JOIN region on store.regionID = region.regionID GROUP BY Region.regionID;').fetchall() 
+    for region in regionSales:
+        regionSalesList[region['regionName']] = region['totalSales']
+    print(regionSalesList)
+    employeeSalesList = {}
+    employeeSales = db.execute('SELECT salespersons.name as name, SUM(price * quantity) AS totalSales From SalesPersons Join Transactions on Transactions.employeeID = Salespersons.employeeID Group BY salespersons.employeeID ORDER BY totalSales DESC').fetchall()
+    for employee in employeeSales:
+        employeeSalesList[employee['name']] = employee['totalSales']
+    print(employeeSalesList)
+
+    return render_template('store/stats2.html', regionSalesList = regionSalesList, employeeSalesList = employeeSalesList)
+
+
+@bp.route('/inventory', methods=['GET','POST'])
+def inventory():
+    db = get_db()
+
+    productQuantList = {}
+    products = db.execute('SELECT * from products' ).fetchall()
+    for item in products:
+        productQuantList[item['productID']] = (item['title'],item['inventoryAmount'])
+    return render_template('store/inventory.html', products = productQuantList)

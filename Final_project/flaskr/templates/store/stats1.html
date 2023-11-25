@@ -8,11 +8,11 @@
 
 {% block content %}
 
-<h1> Products by highest Sales </h1>
+<h1> Products by Highest Sales </h1>
 
 <ul>
 {% for product in productSalesList %}
-
+{%if productSalesList[product][1] > 0%}
 <li>
     <div>
     <img src="static/img/{{ product}}.jpg" alt="" width="75px" height="75px">
@@ -25,22 +25,44 @@
    {% endif%}
     </div>
 </li>   
+{%endif%}
 {% endfor %}
+</ul>
+
 <h1> Products by Highest Quantity Sold </h1>
 
+
+<ul>
 {% for product in productQuantList %}
+{%if productQuantList[product][1] > 0%}
 
 <li>
     <div>
     <img src="static/img/{{ product}}.jpg" alt="" width="75px" height="75px">
     <span >{{ productQuantList[product][0]}} - </span>
-    Total Quantity Sold
-    <span>Quantity: {{productQuantList[product][1]|int}}</span>
+    <span>Total Quantity Sold:{{productQuantList[product][1]|int}}</span>
 
     </div>
-</li>   
+</li>
+{%endif%}   
 {% endfor %}
 
+</ul>
+
+<h1> Top Selling Genres</h1>
+
+
+<ul>
+{% for genre in genreList %}
+
+<li>
+    <div>
+    <span >{{ genre }} - </span>
+    <span>Total Quantity Sold:{{genreList[genre]|int}}</span>
+
+    </div>
+</li>  
+{% endfor %}
 
 </ul>
 {% endblock %}

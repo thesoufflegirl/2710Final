@@ -34,8 +34,10 @@
    </form>
     {%if total == 0%}
     <h1>Total Price ${{total|int}}</h1>
-    {% endif%}
-   <h1>Total Price ${{total|round(2, 'floor')}}</h1>
+    {% else%}
+
+   <h1>Total Price ${{ "%0.2f" | format(total | float) }}</h1>
+   {% endif%}
  </div>
 {% endblock %}
 

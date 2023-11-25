@@ -3,6 +3,9 @@
 {% block header %}
   <h1>{% block title %}Enter Quantities{% endblock %}</h1>
     <a class="action" href="{{ url_for('store.bookstats') }}">See Stats for Books</a>
+    <a class="action" href="{{ url_for('store.workstats') }}">See Sales Stats</a>
+    <a class="action" href="{{ url_for('store.inventory') }}">Current Product Inventory</a>
+
 
 {% endblock %} 
 
@@ -15,7 +18,7 @@
                     <div>
                         <img src="static/img/{{ product['productID']}}.jpg" alt="" width="75px" height="75px">
                         <span >{{ product['title']}}</span>
-                        <span class="product-price">{{ product['price']}}</span>
+                        <span class="product-price">{{ "%0.2f" | format(product['price'] | float) }}</span>
                         <input type="hidden" name="code" value="{{ product['productID']}}"/>
                         <input type="text" class="product-quantity" name="quantity{{ product['productID']}}" value="0" size="2" />
                     </div>

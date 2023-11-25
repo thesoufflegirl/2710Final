@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Store and Employee Stats{% endblock %}</h1>
+    <a class="action" href="{{ url_for('store.salesview') }}">Return to Order Form</a>
+
+{% endblock %} 
+
+{% block content %}
+
+<h1> Regions by Highest Sales </h1>
+
+<ul>
+{% for region in regionSalesList %}
+<li>
+    <div>
+    <span >{{ region}} - </span>
+    Total Sales:
+    {%if regionSalesList[region]== 0%}
+    <span>Total Sales ${{regionSalesList[region]|int}}</span>
+   {%else%}
+   <span>Total Sales ${{regionSalesList[region]|round(2, 'floor')}}</span>
+   {% endif%}
+    </div>
+</li>   
+{% endfor %}
+</ul>
+
+
+<h1> Sales by Employee </h1>
+
+<ul>
+{% for employee in employeeSalesList %}
+<li>
+    <div>
+    <span >{{employee}} - </span>
+    {%if employeeSalesList[region]== 0%}
+    <span>Total Sales ${{employeeSalesList[employee]|int}}</span>
+   {%else%}
+   <span>Total Sales ${{ "%0.2f" | format(employeeSalesList[employee] | float) }}</span>
+   {% endif%}
+    </div>
+</li>   
+{% endfor %}
+</ul>
+{% endblock %} 
