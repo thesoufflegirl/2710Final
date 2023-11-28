@@ -28,6 +28,7 @@ input[type=submit] { align-self: start; min-width: 10em; }
 li:nth-child(odd) { background:  #e6e6e6
 ; }
 
+tr:nth-child(odd) { background:  #e6e6e6;}
 
 ul {
   display: block;

@@ -4,7 +4,10 @@
   <h1>{% block title %}Enter Quantities{% endblock %}</h1>
     <a class="action" href="{{ url_for('store.bookstats') }}">See Stats for Books</a>
     <a class="action" href="{{ url_for('store.workstats') }}">See Sales Stats</a>
-    <a class="action" href="{{ url_for('store.inventory') }}">Current Product Inventory</a>
+    <a class="action" href="{{ url_for('store.inventory') }}">Inventory</a>
+    {%if role == 'manager'%}
+     <a class="action" href="{{ url_for('store.manager') }}">Manager Settings</a>
+    {%endif%}
 
 
 {% endblock %} 

@@ -193,6 +193,7 @@ def browse():
 
 @bp.route('/salesview', methods=['GET','POST'])
 def salesview():
+    print(session.get('jobTitle'))
     db = get_db()
     session.get('genreList', [])
     genre = db.execute('SELECT DISTINCT genreClassification FROM Products').fetchall()
@@ -204,7 +205,8 @@ def salesview():
     products = db.execute(
         'SELECT productID, title,price FROM Products'
     ).fetchall() 
-    return render_template('store/sales.html', products=products, genreList = genreList)
+    print(session.get('jobTitle'))
+    return render_template('store/sales.html', products=products, genreList = genreList,role = session.get('jobTitle'))
 
 
 @bp.route('/sale', methods=['GET','POST'])
@@ -289,3 +291,117 @@ def inventory():
     for item in products:
         productQuantList[item['productID']] = (item['title'],item['inventoryAmount'])
     return render_template('store/inventory.html', products = productQuantList)
+
+
+@bp.route('/manager', methods=['GET','POST'])
+def manager():
+    db = get_db()
+    employees = db.execute('SELECT * from Salespersons').fetchall()
+    print(employees[0]['employeeID'])
+    productQuantList = {}
+    products = db.execute('SELECT * from products' ).fetchall()
+    regions = db.execute('SELECT * from region' ).fetchall()
+    return render_template('store/manager.html', products = products,employees=employees,regions=regions)
+
+
+@bp.route('/removeEmployee', methods=['GET','POST'])
+def removeEmployee():
+    print('remove')
+    db = get_db()
+    print(request.form['employeeID'])
+    employeeID = request.form['employeeID']
+    users = db.execute('SELECT * from user').fetchall()
+    employees = db.execute('SELECT * from Salespersons').fetchall()
+
+    userlist = {}
+    for user in users:
+       userlist[user['id']] = (user['username'])
+    print(userlist)
+    employeeList = {} 
+    print('employees')
+    for employee in employees:
+       employeeList[employee['employeeid']] = (employee['name'])
+    print(employeeList)
+
+    #db.execute('PRAGMA foreign_keys = ON;')
+
+    db.execute('DELETE FROM user WHERE id = ?;',(employeeID,))
+    db.commit()
+
+    return redirect(url_for('store.manager'))
+
+@bp.route('/editInventory', methods=['GET','POST'])
+def editInventory():
+    print(request.form)
+    db = get_db()
+    products = db.execute('SELECT * from products').fetchall()
+    for product in products:
+        id = product['productID']
+        rformname = f"quantity{id}"
+        amount= int(request.form[rformname])
+        db.execute('UPDATE Products SET inventoryAmount = ? WHERE productID = ?',(amount,id))
+        db.commit()
+    return redirect(url_for('store.manager'))
+
+
+
+@bp.route('/removeProduct', methods=['GET','POST'])
+def removeProduct():
+    print('remove')
+    db = get_db()
+    print('request')
+    print(request.form['productID'])
+    productID = request.form['productID']
+    print(productID)
+    products = db.execute('SELECT * from products WHERE productID = ?', (productID,)).fetchall()
+    print('products')
+    print(products)
+    #db.execute('PRAGMA foreign_keys = ON;')
+
+    db.execute('DELETE FROM Products WHERE productid = ?;',(productID,))
+    db.commit()
+
+    return redirect(url_for('store.manager'))
+
+
+@bp.route('/addProduct', methods=['GET','POST'])
+def addProduct():
+    print('add')
+    db = get_db()
+    title = request.form['title']
+    inventory = request.form['inventory']
+    price = request.form['price']
+    genre = request.form['genre']
+    author = request.form['author']
+    try:
+        db.execute("INSERT INTO Products (title, author,inventoryAmount,price,genreClassification) VALUES (?, ?,?,?,?)",
+                    (title, author,inventory, price,genre),
+                )
+        db.commit()
+    except:
+        flash("Sorry there was an error")
+    return redirect(url_for('store.manager'))
+
+
+@bp.route('/addStore', methods=['GET','POST'])
+def addStore():
+    print('add')
+    db = get_db()
+    address = request.form['address']
+    print(address)
+    manager = db.execute('SELECT employeeID from SalesPersons WHERE name = ?',(request.form['manager'],)).fetchone()['employeeid']
+    print(manager)
+    num= request.form['num']
+    print(num)
+    regionID = request.form['regionID']
+    print(regionID)
+    try:
+        db.execute("INSERT INTO Store (address, manager,numberofSalespersons,regionID) VALUES (?, ?,?,?);",
+                    (address, manager, num,regionID),
+                )
+        db.commit()
+        print('gotit')
+    except:
+        flash("Sorry there was an error")
+    return redirect(url_for('store.manager'))
+

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Manager Settings{% endblock %}</h1>
+    <a class="action" href="{{ url_for('store.salesview') }}">Return to Order Form</a>
+
+{% endblock %} 
+  
+{% block content %}
+
+<h1> Employees </h1>
+
+<table>
+    <tr>
+    <th>Name</th>
+    <th>Employee ID</th>
+    <th>Store ID</th>
+  </tr>
+{% for employee in employees%}
+  <tr>
+    <div>
+    <td >{{ employee['name']}} </td>
+    <td >{{ employee['employeeID']}} </td>
+    <td >{{ employee['storeAssigned']}} </td>
+    <td>
+    <form method="post" action="/removeEmployee">
+            <input type="hidden" name="employeeID" value="{{ employee['employeeID']}}"/>
+            <input type="submit" value="Remove Employee" class="btnAddAction" />
+    </form>
+    </td>
+    </div>
+</tr>   
+{% endfor %}
+</table>
+
+<h1>Edit  Inventory </h1>
+<form method="post" action="/editInventory">
+<ul>
+{% for product in products%}
+<li>
+    <div>
+    <img src="static/img/{{ product['productID'] }}.jpg" alt="" width="75px" height="75px">
+
+    <span >{{ product['title']}}- </span>
+    Inventory:
+    <input type="text" class="product-quantity" name="quantity{{product['productID']}}" value={{product['inventoryAmount']}} size="2" />
+    </div>
+</li>   
+{% endfor %}
+</ul>
+
+<input type="submit" value="Update Inventory" class="btnAddAction" />
+
+</form>
+
+
+<h1> Remove Products </h1>
+
+<table>
+    <tr>
+    <th>Title</th>
+    <th>Quantity</th>
+    <th>Product ID</th>
+  </tr>
+{% for product in products%}
+  <tr>
+    <div>
+    <td >{{product['title']}} </td>
+    <td >{{product['inventoryAmount']}} </td>
+    <td >{{product['productID']}} </td>
+    <td>
+    <form method="post" action="/removeProduct">
+            <input type="hidden" name="productID" value="{{ product['productID']}}"/>
+            <input type="submit" value="Remove Product" class="btnAddAction" />
+    </form>
+    </td>
+    </div>
+</tr>   
+{% endfor %}
+</table>
+
+
+<h1> Add A Product </h1>
+
+<form method="post" action="/addProduct">
+        <label for="Title">Title</label>
+        <input name="title" id="title" value = ''>
+        <label for="author">Author</label>
+        <input name="author" id="author" value = ''>
+        <label for="inventory">Inventory Amount</label>
+        <input name="inventory" id="inventory" value = '0'>
+        <label for="price">Price</label>
+        <input name="price" id="price" value = '0'>
+        <label for="genre">Genre</label>
+        <input name="genre" id="genre" value = '0'>
+        <input type="submit" value="Add Product" class="btnAddAction" />
+    </form>
+
+<h1> Add A Store </h1>
+
+<form method="post" action="/addStore">
+        <label for="address">Address</label>
+        <input name="address" id="adress" value = ''>
+        <label for="manager">Manager</label>
+        <select name= "manager" id = "manager">
+        {% for employee in employees%}
+            <option manager= "{{employee['name']}}" SELECTED>{{employee['name']}}</option>
+        {% endfor %}
+        </select>
+        <label for="num">Number of Salespersons</label>
+        <input name="num" id="num" value = '0'>
+
+        <label for="regionID">Region</label>
+        <select name= "regionID" id = "regionID">
+        {% for region in regions%}
+            <option regionID= "{{region['regionID']}}" SELECTED>{{region['regionID']}}</option>
+        {% endfor %}
+        <input type="submit" value="Add Product" class="btnAddAction" />
+    </form>
+
+{% endblock %} 
+
+
+
+

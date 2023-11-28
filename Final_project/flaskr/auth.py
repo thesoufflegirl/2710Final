@@ -12,22 +12,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     print("register")
-    ## first we have to fix the "oops I'm overwriting people in their tables issue"
     db = get_db()
-    row_count = db.execute("SELECT COUNT(*) FROM user").fetchone()[0]
-    print(row_count)
-    if row_count == 0:
-        print('did it')
-        start = db.execute("SELECT MAX(Salespersons.employeeID) FROM Customers FULL JOIN Salespersons").fetchone()[0]
-        print("start",start)
-        db.execute(
-         "INSERT INTO user (id,username, password,role,infodone) VALUES (?,?, ?,?,?)",
-                             (start,'once', generate_password_hash('abc'), 'admin',"no"),
-                )
-        db.commit()
-
-        #Fixed - set a first userID to be above any sample data, no overlap between userID and Employee or CustomerID
-    #dont
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -91,9 +76,12 @@ def newSalesPerson():
                 except db.IntegrityError:
                    error = "There's an error in your information, please try again"
                 else:
+                    employee = db.execute('SELECT * FROM Salespersons WHERE employeeID = ?', (session.get('user_id'),)).fetchone()
+                    session['jobTitle'] = employee['jobTitle']
+                    print(employee['jobTitle'])
                     return redirect(url_for('store.salesview'))
         flash(error)
-    
+        
     return render_template('auth/newSalesPerson.html',storeList=storeList)
     
 
@@ -127,7 +115,12 @@ def login():
                 print('going to sales')
                 return redirect(url_for("auth.newSalesPerson"))
             elif user['role'] == "Sales Person":
-                print('going to the sales view')
+                print(user['id'])
+                employee = db.execute('SELECT * FROM Salespersons WHERE employeeID = ?', (user['id'],)).fetchone()
+                session['jobTitle'] = employee['jobTitle']
+                print('jobTitle')
+                print(employee['jobTitle'])
+
                 return redirect(url_for('store.salesview'))
             else:
                 return redirect(url_for('index'))
@@ -202,7 +195,6 @@ def info():
                         return redirect(url_for('index'))
 
         flash(error)
-
 
     return render_template('auth/info.html')
 

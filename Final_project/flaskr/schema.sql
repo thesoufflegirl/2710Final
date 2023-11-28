@@ -30,12 +30,12 @@ CREATE TABLE Customers (
     businessCategory VARCHAR(255), -- Only if kind is "business"
     companyGrossAnnualIncome DECIMAL(15,2), -- Only if kind is "business"
     foreign key (customerID) references user(id)
-    on delete set null
+    on delete Cascade
 );
 
 
 CREATE TABLE Products (
-    productID INT PRIMARY KEY,
+    productid INTEGER PRIMARY KEY AUTOINCREMENT,
     title VARCHAR(255),
     author VARCHAR(255),
     inventoryAmount INT,
@@ -49,17 +49,23 @@ CREATE TABLE Transactions (
     date DATE,
     employeeID INT,
     productID INT, -- Foreign key referencing Products table
-    customerID INT, -- Foreign key referencing Customers table
+    customerID INT, 
     price DECIMAL(10,2),
     quantity INT,
-    foreign key (employeeID) references employee(employeeID)
+    foreign key (employeeID) references Salespersons(employeeID)
     on delete set null,
-    foreign key (productID) references product(productID)
-    on delete set null,
-    foreign key (customerID) references customer(customerID)
+    foreign key (productID) references products(productID)
     on delete set null
 );
 
+
+CREATE TABLE Store (
+    storeID INTEGER PRIMARY KEY AUTOINCREMENT,
+    address VARCHAR(255),
+    manager VARCHAR(255), -- Foreign key referencing Salespersons table
+    numberOfSalespersons INT,
+    regionID INT -- Foreign key referencing Region table
+);
 
 CREATE TABLE Salespersons (
     employeeID INT PRIMARY KEY,
@@ -69,27 +75,11 @@ CREATE TABLE Salespersons (
     jobTitle VARCHAR(255),
     storeAssigned VARCHAR(255), -- Foreign key referencing Store table
     salary DECIMAL(12,2),
-    foreign key (employeeID) references user(userID)
+    foreign key (employeeID) references user(ID)
     on delete cascade,
     foreign key (storeAssigned) references store(storeID)
     on delete set null
 );
-
-
-CREATE TABLE Store (
-    storeID INT PRIMARY KEY,
-    address VARCHAR(255),
-    manager VARCHAR(255), -- Foreign key referencing Salespersons table
-    numberOfSalespersons INT,
-    regionID INT -- Foreign key referencing Region table
-);
-
-INSERT INTO Store VALUES
-(1, '123 Market St', 1, 1, 1),
-(2, '456 Retail St', 3, 2, 2),
-(3, 'online', 6,1,1);
-
-
 
 
 CREATE TABLE Region (
@@ -97,6 +87,27 @@ CREATE TABLE Region (
     regionName VARCHAR(255),
     regionManager VARCHAR(255) -- Foreign key referencing Salespersons table
 );
+
+
+
+INSERT INTO user VALUES
+    (1,'John Doe','password,','Customer','yes'),
+    (2,'Jane Smith','password,','Customer','yes'),
+    (3,'ABC Corp','password,','Customer','yes'),
+    (4,'XYZ Inc','password,','Customer','yes'),
+    (5,'Sam Johnson','password,','Customer','yes'),
+    (6,'Cole Curry', 'password','Sales Person','yes'),
+    (7,'Abbi Kline', 'password','Sales Person','yes'),
+    (8,'Alex Wade', 'password','Sales Person','yes'),
+    (9,'June Byers', 'password','Sales Person','yes'),
+    (10,'Linda Buck', 'password','Sales Person','yes'),
+    (11, 'Maddie K','password','Sales Person','yes');
+
+
+INSERT INTO Store VALUES
+(1, '123 Market St', 1, 1, 1),
+(2, '456 Retail St', 3, 2, 2),
+(3, 'online', 6,1,1);
 
 
 INSERT INTO Products VALUES 
