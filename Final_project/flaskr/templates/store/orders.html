@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Past Orders{% endblock %}</h1>
+    <a class="action" href="{{ url_for('store.index') }}">Continue Browsing</a>
+
+{% endblock %} 
+
+{% block content %}
+
+<table>
+    <tr>
+    <th> </th>
+    <th>Title</th>
+    <th>Price</th>
+    <th>Quanity</th>
+    <th>Order Date</th>
+  </tr>
+{% for order in orders %}
+{%if order['quantity'] > 0%}
+<tr>
+    <td><img src="static/img/{{ order['productID']}}.jpg" alt="" width="75px" height="75px"></td>
+    <td><span >{{ order['title']}}</span></td>
+                     <td class="product-price">{{ "%0.2f" | format(order['price'] | float) }}</td>
+                        <td class="product-price">{{order['quantity']}}</td>
+                        <td class="product-price">{{order['date']}}</td>
+
+</tr>
+{%endif%}
+
+{% endfor %}
+
+
+{% endblock %}

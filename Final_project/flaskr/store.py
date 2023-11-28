@@ -405,3 +405,17 @@ def addStore():
         flash("Sorry there was an error")
     return redirect(url_for('store.manager'))
 
+
+
+@bp.route('/orders', methods=['GET','POST'])
+def orders():
+    db = get_db()
+    orders = db.execute('SELECT * from Transactions Join products ON  products.productID = Transactions.productID where customerID = ?',(session.get('user_id'),)).fetchall()
+    for order in orders:
+        print(order['ordernumber'])
+    return render_template('store/orders.html', orders=orders)
+
+
+
+
+

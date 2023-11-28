@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Browse{% endblock %}</h1>
   {% if g.user %}
-    <a class="action" href="{{ url_for('store.cart') }}">Cart</a>
+</div>
+   <a class="action" href="{{ url_for('store.cart') }}">Cart</a>
+    <a class="action" href="{{ url_for('store.orders') }}">Past Orders</a>
+</div>
+<br>
      <form method="post" action="/browse">
         <div>
         <label for="genre">Genre</label>
@@ -17,15 +20,16 @@
         <label for="title">Title</label>
         <input name="title" id="title">
         <input type="submit" value="Sort">
-    </div>
      </form>
+
 
   {% endif %}
 {% endblock %} 
 
 {% block content %}
-
+<ul>
 {% for product in products %}
+<li>
 <div class="product-item">
                 <form method="post" action="/add">
                     <div class="product-image"><img src="static/img/{{ product['productID']}}.jpg" alt="" width="200px" height="200px"></div>
@@ -39,7 +43,10 @@
                         </div>
                     </div>
                 </form>
-            </div>     
+            </div>   
+
+</li>  
 {% endfor %}
+</ul>
 
 {% endblock %}
